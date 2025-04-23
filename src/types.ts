@@ -24,4 +24,5 @@ export interface UserProfile {
   pregnancyDueDate?: string;
   postpartumDate?: string;
   name?: string;
+  openaiApiKey?: string;
 }

@@ -1,7 +1,7 @@
 // Utility for streaming OpenAI chat completions
 import type { ChatMessage } from '../types';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const ENV_OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
 
 // System prompt for postpartum/Whoop context
@@ -23,7 +23,9 @@ export async function streamOpenAIChat({
   user: any;
   systemPromptPrefix?: string;
 }) {
-  if (!OPENAI_API_KEY) throw new Error('Missing OpenAI API key');
+  // Prefer the user's API key if set, otherwise use the env key
+  const OPENAI_API_KEY = user?.openaiApiKey || ENV_OPENAI_API_KEY;
+  if (!OPENAI_API_KEY) throw new Error('Missing OpenAI API key. Please add it in your Profile page.');
 
   // Compose a single input string for the API
   let input = (systemPromptPrefix ? systemPromptPrefix + '\n' : '') + SYSTEM_PROMPT + '\n';
