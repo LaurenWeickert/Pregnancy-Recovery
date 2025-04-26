@@ -10,17 +10,17 @@ import { formatInTimeZone } from 'date-fns-tz';
 
 const GENERIC_STARTERS = [
   "How does my sleep quality affect my postpartum recovery?",
-  "What does my recovery score mean for breastfeeding?",
+  "What does my recovery score mean for my postpartum health?",
   "Should I start exercising based on my current strain?",
   "Is my heart rate variability normal for postpartum?",
-  "How can I improve my sleep while caring for my baby?"
+  "How can I improve my sleep during the postpartum period?"
 ];
 
-const DELIVERY_DATE_PROMPT = "My baby was born on YYYY-MM-DD";
-const SLEEP_PROMPT = "How can I improve my sleep while caring for my baby?";
+const DELIVERY_DATE_PROMPT = "My pregnancy ended on YYYY-MM-DD";
+const SLEEP_PROMPT = "How can I improve my sleep during the postpartum period?";
 const ACTIVITY_PROMPT = "When is it safe to start exercising postpartum?";
 const HRV_PROMPT = "Is my heart rate variability normal for postpartum?";
-const BREASTFEEDING_PROMPT = "What does my recovery score mean for breastfeeding?";
+const BREASTFEEDING_PROMPT = "What does my recovery score mean for my postpartum health?";
 
 export const ChatInterface = () => {
   const [input, setInput] = useState('');
