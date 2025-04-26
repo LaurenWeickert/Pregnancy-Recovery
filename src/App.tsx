@@ -105,7 +105,7 @@ function App() {
             )}
             {/* Logo/Title on the left */}
             <a href="#" className="flex items-center gap-2 justify-center sm:justify-start min-w-0 mx-auto sm:mx-0">
-              <span className="text-base sm:text-lg font-semibold text-purple-900 whitespace-nowrap truncate max-w-[70vw] sm:max-w-xs">Postpartum Wellness Assistant</span>
+              <span className="text-base sm:text-lg font-semibold text-purple-900 whitespace-nowrap truncate max-w-[70vw] sm:max-w-xs">Postpartum Chat</span>
             </a>
             {/* Tabs row for desktop */}
             <div className="hidden sm:flex flex-1 justify-center">
