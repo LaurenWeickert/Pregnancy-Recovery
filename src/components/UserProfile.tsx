@@ -34,7 +34,7 @@ export const UserProfile = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center space-x-3">
-          <User className="w-8 h-8 text-purple-600" />
+          <User className="w-8 h-8 text-brand-green" />
           <div>
             <h2 className="text-lg font-semibold">{user.name || <span className="text-gray-400 italic">(not set)</span>}</h2>
             <p className="text-sm text-gray-600">
@@ -64,7 +64,7 @@ export const UserProfile = () => {
             />
             <button
               type="submit"
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors text-sm"
+              className="bg-brand-green text-white px-4 py-2 rounded hover:bg-brand-green/80 transition-colors text-sm"
               disabled={!apiKeyInput || apiKeyInput === '********'}
             >
               Save

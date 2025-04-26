@@ -3,6 +3,12 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      colors: {
+        brand: {
+          green: '#1F3D1F',
+          gold: '#FFDB00',
+        },
+      },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
       },
