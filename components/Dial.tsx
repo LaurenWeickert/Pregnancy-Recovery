@@ -38,7 +38,7 @@ export default function Dial({
     if (value < 30) return '#ef4444'; // Red for danger
     if (value < 60) return '#f59e0b'; // Orange for warning
     if (value < 80) return '#10b981'; // Green for good
-    return '#6366f1'; // Purple for excellent
+    return '#1F3D1F'; // Brand green for excellent
   };
 
   const animatedProps = useAnimatedProps(() => {
