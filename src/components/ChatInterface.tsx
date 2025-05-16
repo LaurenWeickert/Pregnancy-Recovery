@@ -3,12 +3,14 @@ import { Send, Loader2, ChevronDown, X } from 'lucide-react';
 import { PostpartumSurvey } from './PostpartumSurvey';
 import { useStore } from '../store/useStore';
 import { getTimeAgo } from '../utils/timeAgo';
+import { UserProfile } from '../types';
 import ReactMarkdown from 'react-markdown';
 import { streamOpenAIChat } from '../utils/openai';
 import * as chrono from 'chrono-node';
 import { isValid } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 
+// Generic starters for users without survey data
 const GENERIC_STARTERS = [
   "How does my sleep quality affect my postpartum recovery?",
   "What does my recovery score mean for breastfeeding?",
@@ -17,11 +19,58 @@ const GENERIC_STARTERS = [
   "How can I improve my sleep while caring for my baby?"
 ];
 
+// Starters for users who experienced pregnancy/infant loss
+const LOSS_STARTERS = [
+  "How can I support my physical recovery after loss?",
+  "What sleep patterns might I expect during this time?",
+  "How might my heart rate data reflect my emotional state?",
+  "When might I consider gentle movement for emotional well-being?",
+  "How can I interpret my recovery metrics during this time?"
+];
+
+// Starters for users with multiple births
+const MULTIPLE_BIRTH_STARTERS = [
+  "How does caring for multiples affect my recovery metrics?",
+  "What sleep strategies work for parents of multiples?",
+  "How should I pace my physical recovery with multiples?",
+  "What strain levels are typical when caring for multiple babies?",
+  "How can I balance self-care with the demands of multiple babies?"
+];
+
+// Starters for users whose babies are not at home
+const BABIES_NOT_HOME_STARTERS = [
+  "How can I monitor my recovery while separated from my baby?",
+  "What sleep patterns might help during this separation period?",
+  "How might my metrics reflect the emotional aspects of separation?",
+  "What gentle activities might support my well-being during this time?",
+  "How can I interpret changes in my recovery score during this period?"
+];
+
+// Standard prompts that can be adapted based on context
 const DELIVERY_DATE_PROMPT = "My baby was born on YYYY-MM-DD";
 const SLEEP_PROMPT = "How can I improve my sleep while caring for my baby?";
 const ACTIVITY_PROMPT = "When is it safe to start exercising postpartum?";
 const HRV_PROMPT = "Is my heart rate variability normal for postpartum?";
 const BREASTFEEDING_PROMPT = "What does my recovery score mean for breastfeeding?";
+
+// Helper function to get personalized prompts based on survey data
+const getPersonalizedPrompts = (user: UserProfile | null) => {
+  if (!user || !user.surveyData) return GENERIC_STARTERS;
+  
+  if (user.surveyData.hasExperiencedLoss) {
+    return LOSS_STARTERS;
+  }
+  
+  if (user.surveyData.hadMultipleBirth) {
+    return MULTIPLE_BIRTH_STARTERS;
+  }
+  
+  if (user.surveyData.babiesAtHome === false) {
+    return BABIES_NOT_HOME_STARTERS;
+  }
+  
+  return GENERIC_STARTERS;
+};
 
 export const ChatInterface = () => {
   const [input, setInput] = useState('');
@@ -74,28 +123,47 @@ export const ChatInterface = () => {
     }, 100);
   };
 
-  // Helper to update suggestions based on latest context
+  // Helper to update suggestions based on latest context and survey data
   const updateSuggestions = (latestContent?: string) => {
+    // If no delivery date, prioritize getting that information
     if (!user?.postpartumDate) {
       setSuggestions([
         DELIVERY_DATE_PROMPT,
         SLEEP_PROMPT,
         ACTIVITY_PROMPT
       ]);
-    } else if (messages.length === 0) {
-      setSuggestions(GENERIC_STARTERS.slice(0, 3));
+      return;
+    }
+    
+    // For initial conversation, use personalized starters based on survey data
+    if (messages.length === 0) {
+      const personalizedStarters = getPersonalizedPrompts(user);
+      setSuggestions(personalizedStarters.slice(0, 3));
+      return;
+    }
+    
+    // For ongoing conversation, adapt based on context
+    const lastMessage = (latestContent ?? messages[messages.length - 1]?.content ?? '').toLowerCase();
+    
+    // Adapt pool based on survey data
+    let pool = [SLEEP_PROMPT, ACTIVITY_PROMPT, HRV_PROMPT];
+    
+    // Don't suggest breastfeeding prompts for users who experienced loss
+    if (!user.surveyData?.hasExperiencedLoss) {
+      pool.push(BREASTFEEDING_PROMPT);
+    }
+    
+    // Context-based suggestions
+    if (lastMessage.includes("sleep")) {
+      setSuggestions([ACTIVITY_PROMPT, HRV_PROMPT]);
+    } else if (lastMessage.includes("exercise") || lastMessage.includes("activity")) {
+      setSuggestions([SLEEP_PROMPT, HRV_PROMPT]);
+    } else if (lastMessage.includes("hrv") || lastMessage.includes("heart rate variability")) {
+      setSuggestions([SLEEP_PROMPT, ACTIVITY_PROMPT]);
     } else {
-      const lastMessage = (latestContent ?? messages[messages.length - 1]?.content ?? '').toLowerCase();
-      const pool = [SLEEP_PROMPT, ACTIVITY_PROMPT, HRV_PROMPT, BREASTFEEDING_PROMPT];
-      if (lastMessage.includes("sleep")) {
-        setSuggestions([ACTIVITY_PROMPT, HRV_PROMPT]);
-      } else if (lastMessage.includes("exercise") || lastMessage.includes("activity")) {
-        setSuggestions([SLEEP_PROMPT, HRV_PROMPT]);
-      } else if (lastMessage.includes("hrv") || lastMessage.includes("heart rate variability")) {
-        setSuggestions([SLEEP_PROMPT, ACTIVITY_PROMPT]);
-      } else {
-        setSuggestions(pool.slice(0, 3));
-      }
+      // Get personalized starters for general follow-ups
+      const personalizedStarters = getPersonalizedPrompts(user);
+      setSuggestions(personalizedStarters.slice(0, 3));
     }
   };
 
