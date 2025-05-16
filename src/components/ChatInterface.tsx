@@ -360,9 +360,9 @@ export const ChatInterface = () => {
             </div>
             <div className="p-4">
               <p className="mb-4 text-gray-600">
-                To provide you with the most supportive and personalized experience, 
-                please answer a few questions about your postpartum journey. This helps 
-                our chat assistant avoid making assumptions about your specific situation.
+                We'd like to know a bit about your experience so we can give you the best support. 
+                Your answers to these few questions will help us tailor our chat to your unique journey. 
+                Everyone's path is different, and we want to be here for you in the way you need most.
               </p>
               <PostpartumSurvey onComplete={handleSurveyComplete} />
             </div>
