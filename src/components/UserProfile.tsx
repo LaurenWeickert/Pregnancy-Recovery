@@ -34,7 +34,7 @@ export const UserProfile = () => {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center space-x-3">
-          <User className="w-8 h-8 text-purple-600" />
+          <User className="w-8 h-8 text-[#1F3D1F]" />
           <div>
             <h2 className="text-lg font-semibold">{user.name || <span className="text-gray-400 italic">(not set)</span>}</h2>
             <p className="text-sm text-gray-600">
@@ -64,7 +64,7 @@ export const UserProfile = () => {
             />
             <button
               type="submit"
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors text-sm"
+              className="bg-[#1F3D1F] text-white px-4 py-2 rounded hover:bg-[#1F3D1F]/80 transition-colors text-sm"
               disabled={!apiKeyInput || apiKeyInput === '********'}
             >
               Save
@@ -81,16 +81,16 @@ export const UserProfile = () => {
             />
             <button
               type="button"
-              className="bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-gray-300 transition-colors text-sm"
+              className="bg-gray-200 text-gray-700 px-3 py-2 rounded hover:bg-[#1F3D1F]/10 transition-colors text-sm"
               onClick={handleEditClick}
             >
               {user.openaiApiKey ? 'Update' : 'Add'}
             </button>
-            {saved && <span className="text-green-600 text-sm ml-2">Saved!</span>}
+            {saved && <span className="text-[#1F3D1F] text-sm ml-2">Saved!</span>}
           </div>
         )}
         <p className="text-xs text-gray-500 mt-1">
-          Your API key is stored only in your browser and used for your chat sessions. <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="underline">Get your key</a>.
+          Your API key is stored only in your browser and used for your chat sessions. <a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener noreferrer" className="underline text-[#1F3D1F] hover:text-[#1F3D1F]/80">Get your key</a>.
         </p>
       </div>
     </div>
