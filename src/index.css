@@ -33,12 +33,12 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c084fc;
+  background: #1F3D1F;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a855f7;
+  background: #FFDB00;
 }
 
 /* Improve input appearance */

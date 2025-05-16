@@ -6,6 +6,12 @@ export interface Score {
   timestamp: string;
 }
 
+export interface EmotionalState {
+  value: number; // 1-5 scale
+  note?: string;
+  timestamp: string;
+}
+
 export interface HeartRateData {
   timestamp: Date;
   bpm: number;
@@ -17,6 +23,7 @@ export interface DailyScores {
   sleep: Score;
   hydration: Score;
   strain: Score;
+  emotionalState?: EmotionalState;
   heartRate: {
     current: number;
     resting: number;
@@ -83,6 +90,9 @@ const generateMockData = (): Record<string, DailyScores> => {
     const maxHR = 180 + Math.round(Math.random() * 20);
     const currentHR = restingHR + Math.round(Math.random() * 20);
 
+    const emotionalStateValue = Math.floor(Math.random() * 5) + 1;
+    const emotionalStateNote = `Note for ${date}`;
+
     data[date] = {
       recovery: {
         value: Math.round(baseRecovery),
@@ -102,6 +112,11 @@ const generateMockData = (): Record<string, DailyScores> => {
       strain: {
         value: Math.round(baseStrain),
         trend: Math.round(strainTrend),
+        timestamp: date,
+      },
+      emotionalState: {
+        value: emotionalStateValue,
+        note: emotionalStateNote,
         timestamp: date,
       },
       heartRate: {
@@ -179,5 +194,49 @@ export const getHeartRateZoneDescription = (zone: HeartRateData['zone']): string
       return 'Maximum zone - For short intervals only';
     default:
       return '';
+  }
+};
+
+// Get emotional state data for today
+export const getTodayEmotionalState = (): EmotionalState | undefined => {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  return mockData[today]?.emotionalState;
+};
+
+// Save emotional state data for today
+export const saveEmotionalState = (value: number, note?: string): void => {
+  const today = format(new Date(), 'yyyy-MM-dd');
+  if (mockData[today]) {
+    mockData[today].emotionalState = {
+      value,
+      note,
+      timestamp: today
+    };
+  }
+};
+
+// Get emotional state data for the past week
+export const getEmotionalStateHistory = (): EmotionalState[] => {
+  return Object.values(mockData)
+    .filter(day => day.emotionalState)
+    .map(day => day.emotionalState as EmotionalState)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+};
+
+// Get description for emotional state value
+export const getEmotionalStateDescription = (value: number): string => {
+  switch (value) {
+    case 1:
+      return "You're having a difficult day. Remember to be gentle with yourself and reach out for support if needed.";
+    case 2:
+      return "You're feeling a bit low today. Try some self-care activities that have helped you in the past.";
+    case 3:
+      return "You're feeling okay today. This is a good time to practice mindfulness and check in with your needs.";
+    case 4:
+      return "You're feeling good today. Celebrate these positive moments and the progress you're making.";
+    case 5:
+      return "You're feeling great today! Notice what's contributing to your positive mood and build on it.";
+    default:
+      return "No emotional state recorded yet today.";
   }
 };
