@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, ChevronDown } from 'lucide-react';
+import { Send, Loader2, ChevronDown, X } from 'lucide-react';
+import { PostpartumSurvey } from './PostpartumSurvey';
 import { useStore } from '../store/useStore';
 import { getTimeAgo } from '../utils/timeAgo';
 import ReactMarkdown from 'react-markdown';
@@ -30,6 +31,7 @@ export const ChatInterface = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [showSurveyOverlay, setShowSurveyOverlay] = useState(false);
   
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
@@ -56,6 +58,21 @@ export const ChatInterface = () => {
     scrollToBottom();
     inputRef.current?.focus();
   }, [messages]);
+  
+  // Check if survey needs to be shown
+  useEffect(() => {
+    if (user && !user.surveyData) {
+      setShowSurveyOverlay(true);
+    }
+  }, [user]);
+  
+  // Handle survey completion
+  const handleSurveyComplete = () => {
+    setShowSurveyOverlay(false);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
 
   // Helper to update suggestions based on latest context
   const updateSuggestions = (latestContent?: string) => {
@@ -193,10 +210,43 @@ export const ChatInterface = () => {
       if (user?.name) {
         systemPromptPrefix += `The user's name is ${user.name}. Please address them by their name in your responses. `;
       }
+      
+      // Add delivery date information
       if (user?.postpartumDate) {
-        systemPromptPrefix += `The user's baby was delivered on ${user.postpartumDate}. Use this information to provide personalized postpartum advice. The user's local timezone is ${userTimezone}. If the user provides a new date in YYYY-MM-DD or W3C/ISO 8601 format, acknowledge it and use it for future context. `;
+        // Be careful with language based on survey data
+        if (user.surveyData?.hasExperiencedLoss) {
+          systemPromptPrefix += `The user experienced pregnancy or infant loss during this pregnancy or birth. The date provided (${user.postpartumDate}) is related to this experience. Be extremely sensitive and compassionate in your responses. The user's local timezone is ${userTimezone}. `;
+        } else {
+          // Use appropriate language based on multiple birth information
+          if (user.surveyData?.hadMultipleBirth) {
+            systemPromptPrefix += `The user had a multiple birth (twins, triplets, etc.) on ${user.postpartumDate}. `;
+          } else {
+            systemPromptPrefix += `The user's baby was delivered on ${user.postpartumDate}. `;
+          }
+          
+          // Add information about babies at home
+          if (user.surveyData?.babiesAtHome === false) {
+            systemPromptPrefix += `The user's baby/babies are currently not at home with them. Be sensitive to this situation. `;
+          } else if (user.surveyData?.babiesAtHome === true) {
+            systemPromptPrefix += `The user's baby/babies are currently at home with them. `;
+          }
+          
+          systemPromptPrefix += `Use this information to provide personalized postpartum advice. The user's local timezone is ${userTimezone}. If the user provides a new date in YYYY-MM-DD or W3C/ISO 8601 format, acknowledge it and use it for future context. `;
+        }
       } else {
         systemPromptPrefix += `The user's baby's delivery date has not been provided. If it is contextually appropriate, gently and empathetically ask the user when their baby was delivered, and request the date in YYYY-MM-DD (W3C/ISO 8601) format. Use bedside manner and sensitivity. The user's local timezone is ${userTimezone}. Do not ask repeatedly. When the user provides a date in this format, acknowledge it and use it for future context. `;
+      }
+      
+      // Add information about first pregnancy
+      if (user.surveyData?.isFirstPregnancy === true) {
+        systemPromptPrefix += `This is the user's first pregnancy. They may need more detailed explanations about postpartum experiences. `;
+      } else if (user.surveyData?.isFirstPregnancy === false) {
+        systemPromptPrefix += `This is not the user's first pregnancy. They have prior experience with pregnancy and postpartum. `;
+      }
+      
+      // Add age information if provided
+      if (user.surveyData?.age) {
+        systemPromptPrefix += `The user is ${user.surveyData.age} years old. Consider age-appropriate advice. `;
       }
       const stream = await streamOpenAIChat({ messages: prevMessages, user, systemPromptPrefix });
       for await (const chunk of stream) {
@@ -227,6 +277,30 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex flex-col w-full min-h-screen pt-20 pb-32 bg-white relative">
+      {/* Survey Overlay */}
+      {showSurveyOverlay && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-[#1F3D1F]/10 flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-[#1F3D1F]">Before we start...</h2>
+              <button 
+                onClick={() => setShowSurveyOverlay(false)}
+                className="text-gray-500 hover:text-[#1F3D1F] rounded-full p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="mb-4 text-gray-600">
+                To provide you with the most supportive and personalized experience, 
+                please answer a few questions about your postpartum journey. This helps 
+                our chat assistant avoid making assumptions about your specific situation.
+              </p>
+              <PostpartumSurvey onComplete={handleSurveyComplete} />
+            </div>
+          </div>
+        </div>
+      )}
       {/* Scroll-to-bottom icon (fixed to viewport, but only when thread is scrollable) */}
       {/* Scroll-to-bottom icon: semi-transparent, only when needed */}
       {showScrollDown && messages.length > 0 && (

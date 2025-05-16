@@ -18,6 +18,14 @@ export interface ChatMessage {
   };
 }
 
+export interface SurveyData {
+  age?: number;
+  hasExperiencedLoss?: boolean;
+  hadMultipleBirth?: boolean;
+  babiesAtHome?: boolean;
+  isFirstPregnancy?: boolean;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -25,4 +33,5 @@ export interface UserProfile {
   postpartumDate?: string;
   name?: string;
   openaiApiKey?: string;
+  surveyData?: SurveyData;
 }
